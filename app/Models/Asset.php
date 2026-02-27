@@ -9,17 +9,21 @@ use Illuminate\Database\Eloquent\Model;
  * Class Asset
  *
  * Representasi model aset dalam sistem.
+ * Menyimpan informasi terkait aset termasuk kategori, unit,
+ * vendor, status, tanggal pembelian, harga, dan masa garansi.
+ *
+ * @package App\Models
  *
  * @property int $id
- * @property string $name
- * @property string $code
- * @property int $category_id
- * @property int $unit_id
- * @property int|null $vendor_id
- * @property string $status
- * @property \Carbon\Carbon|null $purchase_date
- * @property float|null $purchase_price
- * @property \Carbon\Carbon|null $warranty_expiry
+ * @property string $name          Nama aset
+ * @property string $code          Kode unik aset
+ * @property int $category_id      Kategori aset
+ * @property int $unit_id          Lokasi aset disimpan
+ * @property int $vendor_id        Vendor atau pemasok aset
+ * @property string $status        Status aset (aktif, dipinjam, rusak, hilang)
+ * @property \Carbon\Carbon $purchase_date   Tanggal pembelian
+ * @property float $purchase_price           Harga beli
+ * @property \Carbon\Carbon $warranty_expiry Masa garansi
  */
 class Asset extends Model
 {
@@ -27,8 +31,6 @@ class Asset extends Model
 
     /**
      * Atribut yang dapat diisi secara mass-assignment.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -43,30 +45,32 @@ class Asset extends Model
     ];
 
     /**
-     * Event model booted.
-     * Menghasilkan kode aset otomatis dengan format: INV/XXXX/MM/YYYY.
+     * Relasi ke kategori aset.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    protected static function booted()
+    public function category()
     {
-        static::creating(function ($asset) {
-            if (empty($asset->code)) {
-                $month = now()->format('m');
-                $year  = now()->format('Y');
+        return $this->belongsTo(Category::class);
+    }
 
-                $lastCode = self::whereYear('created_at', $year)
-                    ->whereMonth('created_at', $month)
-                    ->orderByDesc('id')
-                    ->value('code');
+    /**
+     * Relasi ke unit atau lokasi penyimpanan aset.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
 
-                if ($lastCode) {
-                    $lastNumber = (int) explode('/', $lastCode)[1];
-                    $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-                } else {
-                    $newNumber = '0001';
-                }
-
-                $asset->code = "INV/{$newNumber}/{$month}/{$year}";
-            }
-        });
+    /**
+     * Relasi ke vendor atau pemasok aset.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class);
     }
 }

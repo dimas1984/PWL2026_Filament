@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class Category
  *
+ * Representasi kategori tiket atau aset dalam sistem.
+ * Kategori dapat memiliki banyak teknisi terkait.
+ *
  * @package App\Models
  *
  * @property int $id
@@ -21,10 +24,18 @@ class Category extends Model
 
     /**
      * Atribut yang dapat diisi secara mass-assignment.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
         'name',
     ];
+
+    /**
+     * Relasi ke teknisi yang memiliki spesialisasi pada kategori ini.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function technicians()
+    {
+        return $this->hasMany(Technician::class);
+    }
 }

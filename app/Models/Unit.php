@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class Unit
  *
+ * Representasi unit dalam sistem.
+ * Unit terhubung dengan lokasi unit tertentu.
+ *
  * @package App\Models
  *
  * @property int $id
@@ -17,11 +20,19 @@ class Unit extends Model
 {
     /**
      * Atribut yang dapat diisi secara mass-assignment.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'unit_location_id',
     ];
+
+    /**
+     * Relasi ke lokasi unit.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function location()
+    {
+        return $this->belongsTo(UnitLocation::class, 'unit_location_id');
+    }
 }
